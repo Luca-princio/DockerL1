@@ -107,6 +107,195 @@ Démarrer un conteneur Redis:
 Lancer un conteneur Nginx relié à Redis:  
 
     docker run -d --name web-app --link redis-server:redis -p 8080:80 nginx  
+
+🔧 Commandes de gestion des volumes Docker  
+
+Création de volume:  
+
+    # Créer un nouveau volume
+    docker volume create mon-volume
+
+    # Alternative : Générer un volume de stockage
+    docker volume create mon-volume  
+
+Liste des volumes:
+
+    # Afficher la liste des volumes
+    docker volume ls
+
+    # Alternative : Lister tous les volumes disponibles
+    docker volume ls  
+
+Container avec volume:
+
+    # Démarrer un container avec montage de volume
+    docker run -d --name nginx-with-volume -v mon-volume:/usr/share/nginx/html -p 8082:80 nginx
+
+    # Alternative : Lancer un conteneur avec volume attaché
+    docker run -d --name nginx-with-volume -v mon-volume:/usr/share/nginx/html -p 8082:80 nginx  
+
+Inspection de volume:
+
+    # Examiner les détails d'un volume
+    docker volume inspect mon-volume
+
+    # Alternative : Obtenir les informations détaillées d'un volume
+    docker volume inspect mon-volume  
+🔄 Stratégies de redémarrage automatique des conteneurs
+
+Redémarrage systématique:
+
+    # Déployer un conteneur avec redémarrage automatique permanent
+    docker run -d --name nginx-always --restart always -p 8083:80 nginx  
+
+Redémarrage conditionnel sur échec:
+
+    # Lancer un conteneur avec redémarrage uniquement en cas d'échec (5 tentatives max)
+    docker run -d --name nginx-on-failure --restart on-failure:5 -p 8084:80 nginx  
+
+# 🐋 Introduction à Docker --- Jour3  
+
+Ce dossier retrace ma troisième journée de formation Docker, consacrée à l'approfondissement des Dockerfiles, des réseaux Docker et de la création d'images sur mesure.  
+
+📚 Bilan du Jour 2  
+   
+    *Manipulation des images Docker (téléchargement, suppression, recherche)  
+    *Analyse détaillée et consultation des journaux des conteneurs  
+    *Utilisation de conteneurs interactifs (Ubuntu, MySQL)  
+    *Gestion avancée des conteneurs (renommage, création d'images, nettoyage)  
+    *Déploiement d'applications multi-conteneurs (Nginx + Redis)  
+    *Gestion des volumes Docker  
+    *Configuration du redémarrage automatique des conteneurs  
+
+🚀 Acquis du Jour 3  
+
+1️⃣ Développement d'images personnalisées via Dockerfile  
+
+Un Dockerfile sert à concevoir une image Docker personnalisée selon des spécifications précises.  
+
+    # Illustration : Construire une image Nginx customisée
+    FROM nginx:latest
+    COPY ./site-html /usr/share/nginx/html
+    EXPOSE 80  
+
+🔨 Construction et exécution de l'image personnalisée :
+
+Générer l'image à partir du Dockerfile  
+
+    docker build -t mon-nginx-personnalise .
+
+Déployer un conteneur utilisant cette nouvelle image  
+
+    docker run -d -p 8085:80 --name nginx-custom mon-nginx-personnalise  
+
+2️⃣ Réseaux Docker  
+
+Docker met à disposition plusieurs types de réseaux pour interconnecter les conteneurs.  
+
+Afficher la liste des réseaux disponibles
+
+    docker network ls  
+
+Créer un réseau bridge personnalisé  
+
+    docker network create mon-reseau  
+
+Déployer deux conteneurs interconnectés sur le même réseau  
+
+    docker run -d --name redis-db --network mon-reseau redis
+    docker run -d --name app-web --network mon-reseau nginx  
+
+🔍 Vérification de la connectivité :  
+Tester la communication entre les conteneurs  
+
+    docker exec -it app-web ping redis-db  
+
+3️⃣ Variables d'environnement et fichiers .env  
+
+Définir des configurations via des variables d'environnement dans un conteneur :  
+
+    # Lancer un conteneur avec variables d'environnement directes
+    docker run -d --name app-env -e APP_ENV=production -e APP_DEBUG=false nginx  
+
+📁 Utilisation d'un fichier .env :  
+
+Fichier .env :  
+
+    MYSQL_ROOT_PASSWORD=supersecret
+    MYSQL_DATABASE=appdb  
+
+Commande de déploiement :  
+
+    docker run -d --name mysql-env --env-file .env mysql:8.0  
+
+4️⃣ Partage de fichiers via bind mounts  
+
+Contrairement aux volumes classiques, les bind mounts permettent de lier directement un répertoire local à un conteneur.  
+
+    docker run -d --name nginx-bind \
+      -v $(pwd)/site-html:/usr/share/nginx/html \
+      -p 8086:80 nginx  
+
+🎯 Cas Pratique : Application Web + Base de données avec réseau personnalisé et Dockerfile  
+
+🌐 Création d'un réseau dédié  
+
+    docker network create app-network  
+
+🗄️ Déploiement de la base de données MySQL  
+
+    docker run -d --name db-app \
+      --network app-network \
+      -e MYSQL_ROOT_PASSWORD=monpass \
+      -e MYSQL_DATABASE=appdb \
+      mysql:8.0  
+
+🔨 Développement de l'application PHP avec Dockerfile  
+Dockerfile :  
+
+    FROM php:7.4-apache
+    RUN docker-php-ext-install mysqli
+    COPY ./src /var/www/html
+    EXPOSE 80  
+
+🚀 Construction et déploiement de l'application  
+
+    docker build -t php-app .
+    docker run -d --name web-app --network app-network -p 8087:80 php-app  
+
+🔗 Fonctionnement  
+L'application PHP pourra communiquer avec la base MySQL via le nom db-app grâce au réseau partagé.  
+
+
+
+
+      
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
     
 
     
