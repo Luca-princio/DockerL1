@@ -266,6 +266,104 @@ Dockerfile :
 🔗 Fonctionnement  
 L'application PHP pourra communiquer avec la base MySQL via le nom db-app grâce au réseau partagé.  
 
+# 🐋 Introduction à Docker --- Jour4  
+
+Ce document retrace ma quatrième journée d’apprentissage de Docker, consacrée à Docker Compose, à la gestion des logs et à l’optimisation des images.  
+
+📋 Rappel du Jour 3  
+
+    Construction d’images sur mesure avec un Dockerfile
+    Utilisation des réseaux Docker (bridge personnalisé, communication entre conteneurs)
+    Gestion des variables d’environnement et fichiers .env
+    Mise en place de bind mounts pour partager des fichiers locaux
+    Cas pratique : déploiement d’une application web connectée à une base MySQL  
+
+🚀 Notions étudiées au Jour 4  
+1️⃣ Docker Compose (gestion simplifiée de plusieurs conteneurs)  
+Un fichier docker-compose.yml permet de définir et d’exécuter plusieurs services simultanément.  
+
+    version: "3.8"
+    services:
+      web:
+        build: .
+        ports:
+          - "8088:80"
+        depends_on:
+          - db
+      db:
+        image: mysql:8.0
+        environment:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: appdb  
+
+👉 Pour lancer l’ensemble des services :  
+
+    docker-compose up -d  
+
+👉 Pour les arrêter :  
+
+    docker-compose down  
+
+2️⃣ Centralisation des logs  
+📄 Pour consulter les journaux d’un service défini dans Docker Compose :  
+
+    docker-compose logs web  
+
+⏱️ Pour suivre l’évolution des logs en direct :  
+
+    docker logs -f web  
+
+3️⃣ Optimisation des images Docker  
+Une bonne pratique consiste à utiliser les multi-stage builds afin de limiter la taille finale des images. 
+
+    # Phase de compilation
+    FROM node:16 AS build
+    WORKDIR /app
+    COPY . .
+    RUN npm install && npm run build  
+
+    # Phase de production allégée
+    FROM nginx:alpine
+    COPY --from=build /app/dist /usr/share/nginx/html
+    EXPOSE 80  
+
+4️⃣ Entretien et nettoyage  
+🗑️ Pour supprimer les conteneurs, images et volumes devenus inutiles :  
+
+    docker system prune -a  
+
+💾 Pour contrôler l’espace disque consommé par Docker :  
+
+    docker system df  
+
+🎯 Exemple concret : Déploiement d’une stack web avec Docker Compose  
+On met en place un projet qui comprend :  
+
+    Un conteneur Nginx pour la partie front-end.
+    Un conteneur MySQL servant de base de données.  
+
+Exemple de fichier docker-compose.yml minimal :  
+
+    version: "3.8"
+    services:
+      frontend:
+        image: nginx
+        ports:
+          - "8090:80"
+      database:
+        image: mysql:8.0
+        environment:
+          MYSQL_ROOT_PASSWORD: admin
+          MYSQL_DATABASE: myapp  
+
+Pour démarrer l’ensemble des services :  
+
+    docker-compose up -d
+
+
+
+
+
 
 
 
