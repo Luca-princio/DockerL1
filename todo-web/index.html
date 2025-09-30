@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>To-Do List</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Ma To-Do List</h1>
+
+    <form id="task-form" class="task-form">
+      <input id="task-input" type="text" placeholder="Ajouter une tâche..." required />
+      <button type="submit">Ajouter</button>
+    </form>
+
+    <ul id="task-list" class="task-list"></ul>
+  </main>
+
+  <script>
+    const form = document.getElementById('task-form');
+    const input = document.getElementById('task-input');
+    const list = document.getElementById('task-list');
+
+    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+    function save() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function render() {
+      list.innerHTML = '';
+      tasks.forEach((t, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <label>
+            <input type="checkbox" ${t.done ? 'checked' : ''} />
+            <span class="${t.done ? 'done' : ''}">${t.text}</span>
+          </label>
+          <button data-i="${i}">✕</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const val = input.value.trim();
+      if (!val) return;
+      tasks.push({ text: val, done: false });
+      save();
+      render();
+      input.value = '';
+    });
+
+    list.addEventListener('click', e => {
+      if (e.target.tagName === 'INPUT') {
+        const idx = [...list.children].indexOf(e.target.closest('li'));
+        tasks[idx].done = e.target.checked;
+        save();
+        render();
+      }
+      if (e.target.tagName === 'BUTTON') {
+        const i = e.target.dataset.i;
+        tasks.splice(i, 1);
+        save();
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
+
